@@ -1,18 +1,37 @@
 import React from "react";
 var csv = require("jquery-csv");
 
-async function handleMintNewTokensFileUpload() {
-  console.log("Handling Mint New Tokens .csv upload...");
+function alertAndExit(msg) {
+  alert(msg);
+  return;
+}
+
+function log(msg) {
+  console.log(msg);
+  let outputText = document.getElementById("outputLog");
+  outputText.insertAdjacentText("beforeend", msg + "\n");
+}
+
+async function processMintNewTokensFile() {
+  log("Handling Mint New Tokens .csv upload...");
   let file = document.getElementById("mintNewTokensFileInput").files[0];
-  console.log(file);
+  log(file);
   let data = await file.text();
   let arrays = csv.toArrays(data);
-  console.log(arrays);
+  log(arrays);
   if (arrays.length < 2) {
-    alert(
+    alertAndExit(
       "The chosen .csv file is too small, either missing the header row or only have a header row and no NFT data to mint"
     );
-    return;
+  }
+
+  let header = arrays[0];
+  log("Header columns: ", header);
+
+  if (!(header.includes("image") || header.includes("animation_url"))) {
+    alertAndExit(
+      "The chosen .csv file contains neither an image or animation_url colums"
+    );
   }
 }
 
@@ -20,9 +39,9 @@ export function Dashboard() {
   return (
     <>
       <div className="container p-4">
+        <h1>Mint New Tokens</h1>
         <div className="row">
-          <div className="col-12">
-            <h1>Mint New Tokens</h1>
+          <div className="col-6">
             <p>
               Upload a .csv file to specify the number of NFTs to be minted as
               well as the metadata properties. Column names dictate the name of
@@ -36,12 +55,26 @@ export function Dashboard() {
                 id="mintNewTokensFileInput"
               ></input>
             </div>
-            <button
-              className="mt-3"
-              onClick={() => handleMintNewTokensFileUpload()}
-            >
-              Mint new tokens
-            </button>
+            <div>
+              <button
+                className="mt-3"
+                onClick={() => processMintNewTokensFile()}
+              >
+                Process new tokens file
+              </button>
+            </div>
+            <div>
+              <button
+                className="mt-3"
+                onClick={() => processMintNewTokensFile()}
+              >
+                Mint new tokens
+              </button>
+            </div>
+          </div>
+          <div className="col-6">
+            <h2>Output</h2>
+            <pre id="outputLog"></pre>
           </div>
         </div>
         <div className="row mt-5">
