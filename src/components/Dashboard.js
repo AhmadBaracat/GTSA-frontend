@@ -1,5 +1,8 @@
 import React from "react";
-import { NFTStorage } from "nft.storage/dist/bundle.esm.min.js";
+import { NFTStorage, File } from "nft.storage/dist/bundle.esm.min.js";
+import mime from "mime";
+import fs from "fs";
+import path from "path";
 import constants from "../constants.json";
 const csv = require("jquery-csv");
 
@@ -14,15 +17,21 @@ function log(msg) {
   outputText.insertAdjacentText("beforeend", msg + "\n\n");
 }
 
-async function getTokenProperties() {
+async function getTokenPropertiesArrays() {
   let file = document.getElementById("mintNewTokensFileInput").files[0];
   let data = await file.text();
   return csv.toArrays(data);
 }
 
+async function getTokenPropertiesObjects() {
+  let file = document.getElementById("mintNewTokensFileInput").files[0];
+  let data = await file.text();
+  return csv.toObjects(data);
+}
+
 async function processMintNewTokensFile() {
   log("Processing token properties file...");
-  let tokenProperties = await getTokenProperties();
+  let tokenProperties = await getTokenPropertiesArrays();
   console.log(tokenProperties);
   if (tokenProperties.length < 2) {
     alertAndExit(
@@ -49,11 +58,26 @@ async function processMintNewTokensFile() {
   log("Press the Minting button to mint the new tokens 🚀 💪");
 }
 
+async function fileFromPath(filePath) {
+  const type = mime.getType(filePath);
+  const content = await fs.promises.readFile(filePath);
+  return new File([content], path.basename(filePath), { type });
+}
+
 async function mintNewTokens() {
   log("Minting new tokens...");
-  let tokenProperties = await getTokenProperties();
   const client = new NFTStorage({ token: constants.NFT_STORAGE_KEY });
-  // console.log(NFT_STORAGE_KEY);
+  let tokenProperties = await getTokenPropertiesObjects();
+  for (const tokenProperty of tokenProperties) {
+    console.log(tokenProperty);
+    const imagePath = tokenProperty["image"];
+    if (imagePath) {
+      console.log(imagePath);
+      const image = await fileFromPath(imagePath);
+      console.log(image);
+    }
+  }
+  // const image = await fileFromPath
   // const metadata = await client.store({
   //   description,
   //   image,
