@@ -19,6 +19,7 @@ src/contracts
 .env.development.local
 .env.test.local
 .env.production.local
+constants.json
 
 npm-debug.log*
 yarn-debug.log*

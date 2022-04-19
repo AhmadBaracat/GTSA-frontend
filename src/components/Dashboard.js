@@ -1,5 +1,7 @@
 import React from "react";
-var csv = require("jquery-csv");
+import { NFTStorage } from "nft.storage/dist/bundle.esm.min.js";
+import constants from "../constants.json";
+const csv = require("jquery-csv");
 
 function alertAndExit(msg) {
   alert(msg);
@@ -12,19 +14,23 @@ function log(msg) {
   outputText.insertAdjacentText("beforeend", msg + "\n\n");
 }
 
-async function processMintNewTokensFile() {
-  log("Handling Mint New Tokens .csv upload...");
+async function getTokenProperties() {
   let file = document.getElementById("mintNewTokensFileInput").files[0];
   let data = await file.text();
-  let arrays = csv.toArrays(data);
-  console.log(arrays);
-  if (arrays.length < 2) {
+  return csv.toArrays(data);
+}
+
+async function processMintNewTokensFile() {
+  log("Processing token properties file...");
+  let tokenProperties = await getTokenProperties();
+  console.log(tokenProperties);
+  if (tokenProperties.length < 2) {
     alertAndExit(
       "The chosen .csv file is too small, either missing the header row or only have a header row and no NFT data to mint"
     );
   }
 
-  let header = arrays[0];
+  let header = tokenProperties[0];
   log(`Header columns: ${header}`);
 
   if (!(header.includes("image") || header.includes("animation_url"))) {
@@ -39,8 +45,19 @@ async function processMintNewTokensFile() {
     .filter((column) => column.includes(attrPrefix))
     .forEach((column) => attributes.push(column.replace(attrPrefix, "")));
   log(`Found ${attributes.length} attributes: ${attributes}`);
-  log(`Found definition for ${arrays.length - 1} tokens`);
+  log(`Found definition for ${tokenProperties.length - 1} tokens`);
   log("Press the Minting button to mint the new tokens 🚀 💪");
+}
+
+async function mintNewTokens() {
+  log("Minting new tokens...");
+  let tokenProperties = await getTokenProperties();
+  const client = new NFTStorage({ token: constants.NFT_STORAGE_KEY });
+  // console.log(NFT_STORAGE_KEY);
+  // const metadata = await client.store({
+  //   description,
+  //   image,
+  // });
 }
 
 export function Dashboard() {
@@ -72,10 +89,7 @@ export function Dashboard() {
               </button>
             </div>
             <div>
-              <button
-                className="mt-3"
-                onClick={() => processMintNewTokensFile()}
-              >
+              <button className="mt-3" onClick={() => mintNewTokens()}>
                 Mint new tokens
               </button>
             </div>

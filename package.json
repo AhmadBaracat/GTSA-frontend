@@ -9,9 +9,12 @@
     "bootstrap": "^4.4.1",
     "ethers": "^5.0.0",
     "jquery-csv": "^1.0.21",
+    "mime": "^3.0.0",
+    "nft.storage": "^5.2.5",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "react-scripts": "3.4.1"
+    "react-scripts": "3.4.1",
+    "web3.storage": "^4.2.0"
   },
   "scripts": {
     "start": "react-scripts start",
