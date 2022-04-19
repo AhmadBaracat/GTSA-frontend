@@ -9,16 +9,15 @@ function alertAndExit(msg) {
 function log(msg) {
   console.log(msg);
   let outputText = document.getElementById("outputLog");
-  outputText.insertAdjacentText("beforeend", msg + "\n");
+  outputText.insertAdjacentText("beforeend", msg + "\n\n");
 }
 
 async function processMintNewTokensFile() {
   log("Handling Mint New Tokens .csv upload...");
   let file = document.getElementById("mintNewTokensFileInput").files[0];
-  log(file);
   let data = await file.text();
   let arrays = csv.toArrays(data);
-  log(arrays);
+  console.log(arrays);
   if (arrays.length < 2) {
     alertAndExit(
       "The chosen .csv file is too small, either missing the header row or only have a header row and no NFT data to mint"
@@ -26,13 +25,22 @@ async function processMintNewTokensFile() {
   }
 
   let header = arrays[0];
-  log("Header columns: ", header);
+  log(`Header columns: ${header}`);
 
   if (!(header.includes("image") || header.includes("animation_url"))) {
     alertAndExit(
       "The chosen .csv file contains neither an image or animation_url colums"
     );
   }
+
+  let attributes = [];
+  const attrPrefix = "attr_";
+  header
+    .filter((column) => column.includes(attrPrefix))
+    .forEach((column) => attributes.push(column.replace(attrPrefix, "")));
+  log(`Found ${attributes.length} attributes: ${attributes}`);
+  log(`Found definition for ${arrays.length - 1} tokens`);
+  log("Press the Minting button to mint the new tokens 🚀 💪");
 }
 
 export function Dashboard() {
