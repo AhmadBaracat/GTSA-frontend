@@ -75,28 +75,26 @@ async function mintNewTokens() {
       }
     }
     console.log(file);
-    // const image = await createNFTStorageFile(file);
+    var fileType;
+    if (fileName.includes("mp4")) {
+      fileType = "video";
+    } else if (fileName.includes("png")) {
+      fileType = "image";
+    }
     const image = new File([file], fileName);
     const nft = {
       image,
       name: fileName,
       description: "GTSA Gold Token",
+      properties: {
+        type: fileType,
+        weight: 2,
+      },
     };
     const metadata = await client.store(nft);
     console.log("NFT data stored!");
     console.log("Metadata URI: ", metadata.url);
-    // const imagePath = tokenProperty["image"];
-    // if (imagePath) {
-    //   console.log(imagePath);
-    //   const image = await fileFromPath(imagePath);
-    //   console.log(image);
-    // }
   }
-  // const image = await fileFromPath
-  // const metadata = await client.store({
-  //   description,
-  //   image,
-  // });
 }
 
 export function Dashboard() {
