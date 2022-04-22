@@ -1,10 +1,15 @@
 import React from "react";
 import { NFTStorage, File } from "nft.storage/dist/bundle.esm.min.js";
 import mime from "mime";
-import fs from "fs";
+import * as fs from "fs";
+// import fs from "fs";
+// import { readFile } from "fs/promises";
+
 import path from "path";
 import constants from "../constants.json";
 const csv = require("jquery-csv");
+// var fs = require("fs");
+// const { readFile } = require("fs").promises;
 
 function alertAndExit(msg) {
   alert(msg);
@@ -58,8 +63,21 @@ async function processMintNewTokensFile() {
   log("Press the Minting button to mint the new tokens 🚀 💪");
 }
 
+function readFileAsync(file) {
+  return new Promise((resolve, reject) => {
+    let reader = new FileReader();
+    reader.onload = () => {
+      resolve(reader.result);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 async function fileFromPath(filePath) {
   const type = mime.getType(filePath);
+  let contentBuffer = await readFileAsync(filePath);
+  console.log(contentBuffer);
   const content = await fs.promises.readFile(filePath);
   return new File([content], path.basename(filePath), { type });
 }

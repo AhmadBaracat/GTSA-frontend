@@ -14,7 +14,9 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1",
-    "web3.storage": "^4.2.0"
+    "web3.storage": "^4.2.0",
+    "node": "^16.14.2",
+    "npm": ">=6"
   },
   "scripts": {
     "start": "react-scripts start",
