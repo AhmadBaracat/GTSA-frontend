@@ -1,15 +1,7 @@
 import React from "react";
-import { NFTStorage, File } from "nft.storage/dist/bundle.esm.min.js";
-import mime from "mime";
-import * as fs from "fs";
-// import fs from "fs";
-// import { readFile } from "fs/promises";
-
-import path from "path";
+import { NFTStorage } from "nft.storage/dist/bundle.esm.min.js";
 import constants from "../constants.json";
 const csv = require("jquery-csv");
-// var fs = require("fs");
-// const { readFile } = require("fs").promises;
 
 function alertAndExit(msg) {
   alert(msg);
@@ -63,37 +55,42 @@ async function processMintNewTokensFile() {
   log("Press the Minting button to mint the new tokens 🚀 💪");
 }
 
-function readFileAsync(file) {
-  return new Promise((resolve, reject) => {
-    let reader = new FileReader();
-    reader.onload = () => {
-      resolve(reader.result);
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-async function fileFromPath(filePath) {
-  const type = mime.getType(filePath);
-  let contentBuffer = await readFileAsync(filePath);
-  console.log(contentBuffer);
-  const content = await fs.promises.readFile(filePath);
-  return new File([content], path.basename(filePath), { type });
-}
-
 async function mintNewTokens() {
   log("Minting new tokens...");
   const client = new NFTStorage({ token: constants.NFT_STORAGE_KEY });
   let tokenProperties = await getTokenPropertiesObjects();
+  let assets = document.getElementById("mintNewTokensAssetsInput").files;
+  console.log(assets);
   for (const tokenProperty of tokenProperties) {
     console.log(tokenProperty);
-    const imagePath = tokenProperty["image"];
-    if (imagePath) {
-      console.log(imagePath);
-      const image = await fileFromPath(imagePath);
-      console.log(image);
+    const fileName = tokenProperty["image"]
+      ? tokenProperty["image"]
+      : tokenProperty["animation_url"];
+    console.log(fileName);
+    var file;
+    for (const asset of assets) {
+      if (asset["name"] === fileName) {
+        file = asset;
+        break;
+      }
     }
+    console.log(file);
+    // const image = await createNFTStorageFile(file);
+    const image = new File([file], fileName);
+    const nft = {
+      image,
+      name: fileName,
+      description: "GTSA Gold Token",
+    };
+    const metadata = await client.store(nft);
+    console.log("NFT data stored!");
+    console.log("Metadata URI: ", metadata.url);
+    // const imagePath = tokenProperty["image"];
+    // if (imagePath) {
+    //   console.log(imagePath);
+    //   const image = await fileFromPath(imagePath);
+    //   console.log(image);
+    // }
   }
   // const image = await fileFromPath
   // const metadata = await client.store({
@@ -115,25 +112,30 @@ export function Dashboard() {
               the properties. Each row will be a single NFT and its associated
               properties values.
             </p>
-            <div>
+            <div className="mt-3">
+              <h4>Choose the .csv file</h4>
               <input
                 type="file"
                 name="file"
                 id="mintNewTokensFileInput"
               ></input>
             </div>
-            <div>
-              <button
-                className="mt-3"
-                onClick={() => processMintNewTokensFile()}
-              >
+            <div className="mt-3">
+              <h4>Choose the directory for the assets</h4>
+              <input
+                directory=""
+                webkitdirectory=""
+                type="file"
+                id="mintNewTokensAssetsInput"
+              />
+            </div>
+            <div className="mt-3">
+              <button onClick={() => processMintNewTokensFile()}>
                 Process new tokens file
               </button>
             </div>
-            <div>
-              <button className="mt-3" onClick={() => mintNewTokens()}>
-                Mint new tokens
-              </button>
+            <div className="mt-3">
+              <button onClick={() => mintNewTokens()}>Mint new tokens</button>
             </div>
           </div>
           <div className="col-6">
