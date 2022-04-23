@@ -85,12 +85,6 @@ async function mintNewTokens() {
       }
     }
     console.log(file);
-    var fileType;
-    if (fileName.includes("mp4")) {
-      fileType = "video";
-    } else if (fileName.includes("png")) {
-      fileType = "image";
-    }
     const image = new File([file], fileName);
     const attributes = extractAttributes(tokenProperty);
     console.log(attributes);
