@@ -69,7 +69,7 @@ function extractAttributes(tokenProperty) {
   return result;
 }
 
-async function getContract() {
+function getContract() {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
 
   const contract = new ethers.Contract(
@@ -91,7 +91,7 @@ async function mintNewTokens() {
   var ids = [];
   var metadataURIs = [];
   for (const tokenProperty of tokenProperties) {
-    const tokenId = tokenProperty["id"];
+    const tokenId = parseInt(tokenProperty["id"]);
     const tokenName = tokenProperty["name"] + ` #${tokenId}`;
     log(`Processing token: ${tokenName}`);
     const fileName = tokenProperty["image"]
@@ -117,12 +117,14 @@ async function mintNewTokens() {
     };
     const metadataURI = await client.store(nft);
     ids.push(tokenId);
-    metadataURIs.push(metadataURI);
+    metadataURIs.push(metadataURI.url.replace(/^ipfs:\/\//, ""));
     log(`NFT data stored!, Metadata URI: ${metadataURI.url}`);
   }
 
-  const contract = getContract();
+  console.log(ids);
+  console.log(metadataURIs);
 
+  const contract = getContract();
   const [selectedAddress] = await window.ethereum.request({
     method: "eth_requestAccounts",
   });
@@ -147,6 +149,36 @@ async function mintNewTokens() {
   }
 
   log("✅ Done minting tokens 💪");
+}
+
+async function testTransaction() {
+  const contract = getContract();
+  console.log(contract);
+
+  const [selectedAddress] = await window.ethereum.request({
+    method: "eth_requestAccounts",
+  });
+
+  try {
+    const owner = selectedAddress;
+    const ids = [13];
+    const metadataURIs = [
+      "bafyreigryltvp6tzhhwqvrboepf2lrmua2lfowpceoqprzx53wvtslayoe/metadata.json",
+    ];
+    // const tx = await contract.mintTokens(owner, ids, metadataURIs);
+    const tx = await contract.changeMetadata(ids[0], metadataURIs[0]);
+    const receipt = await tx.wait();
+
+    if (receipt.status === 0) {
+      throw new Error("Transaction failed");
+    }
+    log("Minted");
+  } catch (error) {
+    if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
+      return;
+    }
+    console.error(error);
+  }
 }
 
 export function Dashboard() {
@@ -188,7 +220,7 @@ export function Dashboard() {
               <button onClick={() => mintNewTokens()}>Mint new tokens</button>
             </div>
             <div className="mt-3">
-              <button onClick={() => getContract()}>Get Contract</button>
+              <button onClick={() => testTransaction()}>testTransaction</button>
             </div>
           </div>
           <div className="col-6">
