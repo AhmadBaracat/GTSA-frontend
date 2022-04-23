@@ -55,6 +55,16 @@ async function processMintNewTokensFile() {
   log("Press the Minting button to mint the new tokens 🚀 💪");
 }
 
+function extractAttributes(tokenProperty) {
+  var result = {};
+  for (const [key, value] of Object.entries(tokenProperty)) {
+    if (key.includes("attr_")) {
+      result[key.replace("attr_", "")] = value;
+    }
+  }
+  return result;
+}
+
 async function mintNewTokens() {
   log("Minting new tokens...");
   const client = new NFTStorage({ token: constants.NFT_STORAGE_KEY });
@@ -82,14 +92,13 @@ async function mintNewTokens() {
       fileType = "image";
     }
     const image = new File([file], fileName);
+    const attributes = extractAttributes(tokenProperty);
+    console.log(attributes);
     const nft = {
       image,
       name: fileName,
       description: "GTSA Gold Token",
-      properties: {
-        type: fileType,
-        weight: 2,
-      },
+      properties: attributes,
     };
     const metadata = await client.store(nft);
     console.log("NFT data stored!");
