@@ -69,8 +69,8 @@ async function mintNewTokens() {
   log("Minting new tokens...");
   const client = new NFTStorage({ token: constants.NFT_STORAGE_KEY });
   let tokenProperties = await getTokenPropertiesObjects();
-  let assets = document.getElementById("mintNewTokensAssetsInput").files;
-  console.log(assets);
+  let assetsFiles = document.getElementById("mintNewTokensAssetsInput").files;
+  console.log(assetsFiles);
   for (const tokenProperty of tokenProperties) {
     console.log(tokenProperty);
     const fileName = tokenProperty["image"]
@@ -78,7 +78,7 @@ async function mintNewTokens() {
       : tokenProperty["animation_url"];
     console.log(fileName);
     var file;
-    for (const asset of assets) {
+    for (const asset of assetsFiles) {
       if (asset["name"] === fileName) {
         file = asset;
         break;
@@ -96,7 +96,7 @@ async function mintNewTokens() {
     console.log(attributes);
     const nft = {
       image,
-      name: fileName,
+      name: tokenProperty["name"],
       description: "GTSA Gold Token",
       properties: attributes,
     };
