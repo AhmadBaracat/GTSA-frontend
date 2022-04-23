@@ -75,15 +75,15 @@ export class Dapp extends React.Component {
     //
     // Note that we pass it a callback that is going to be called when the user
     // clicks a button. This callback just calls the _connectWallet method.
-    // if (!this.state.selectedAddress) {
-    //   return (
-    //     <ConnectWallet
-    //       connectWallet={() => this._connectWallet()}
-    //       networkError={this.state.networkError}
-    //       dismiss={() => this._dismissNetworkError()}
-    //     />
-    //   );
-    // }
+    if (!this.state.selectedAddress) {
+      return (
+        <ConnectWallet
+          connectWallet={() => this._connectWallet()}
+          networkError={this.state.networkError}
+          dismiss={() => this._dismissNetworkError()}
+        />
+      );
+    }
 
     // If the token data or the user's balance hasn't loaded yet, we show
     // a loading component.
@@ -94,6 +94,9 @@ export class Dapp extends React.Component {
     // If everything is loaded, we render the application.
     return (
       <div>
+        <p>
+          Welcome <b>{this.state.selectedAddress}</b> 👋
+        </p>
         <Dashboard />
       </div>
       // <div className="container p-4">

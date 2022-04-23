@@ -1,7 +1,11 @@
 import React from "react";
 import { NFTStorage } from "nft.storage/dist/bundle.esm.min.js";
 import constants from "../constants.json";
+import { ethers } from "ethers";
+import ABIArtifact from "../contract_config/abi.json";
+import AddressArtifact from "../contract_config/address.json";
 const csv = require("jquery-csv");
+const ERROR_CODE_TX_REJECTED_BY_USER = 4001;
 
 function alertAndExit(msg) {
   alert(msg);
@@ -65,14 +69,30 @@ function extractAttributes(tokenProperty) {
   return result;
 }
 
+async function getContract() {
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+
+  const contract = new ethers.Contract(
+    AddressArtifact.address,
+    ABIArtifact.abi,
+    provider.getSigner(0)
+  );
+
+  console.log(contract);
+  return contract;
+}
+
 async function mintNewTokens() {
   log("Minting new tokens...");
   const client = new NFTStorage({ token: constants.NFT_STORAGE_KEY });
   let tokenProperties = await getTokenPropertiesObjects();
   let assetsFiles = document.getElementById("mintNewTokensAssetsInput").files;
   console.log(assetsFiles);
+  var ids = [];
+  var metadataURIs = [];
   for (const tokenProperty of tokenProperties) {
-    const tokenName = tokenProperty["name"];
+    const tokenId = tokenProperty["id"];
+    const tokenName = tokenProperty["name"] + ` #${tokenId}`;
     log(`Processing token: ${tokenName}`);
     const fileName = tokenProperty["image"]
       ? tokenProperty["image"]
@@ -95,8 +115,35 @@ async function mintNewTokens() {
       description: "GTSA Gold Token",
       properties: attributes,
     };
-    const metadata = await client.store(nft);
-    log(`NFT data stored!, Metadata URI: ${metadata.url}`);
+    const metadataURI = await client.store(nft);
+    ids.push(tokenId);
+    metadataURIs.push(metadataURI);
+    log(`NFT data stored!, Metadata URI: ${metadataURI.url}`);
+  }
+
+  const contract = getContract();
+
+  const [selectedAddress] = await window.ethereum.request({
+    method: "eth_requestAccounts",
+  });
+
+  try {
+    log("Sending Minting transaction to the smart contract...");
+    const owner = selectedAddress;
+    const tx = await contract.mintTokens(owner, ids, metadataURIs);
+    const receipt = await tx.wait();
+
+    if (receipt.status === 0) {
+      throw new Error("Transaction failed");
+    }
+    log("Transaction succeeded");
+  } catch (error) {
+    if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
+      return;
+    }
+    log("Transaction failed");
+    log(error);
+    console.error(error);
   }
 
   log("✅ Done minting tokens 💪");
@@ -140,6 +187,9 @@ export function Dashboard() {
             <div className="mt-3">
               <button onClick={() => mintNewTokens()}>Mint new tokens</button>
             </div>
+            <div className="mt-3">
+              <button onClick={() => getContract()}>Get Contract</button>
+            </div>
           </div>
           <div className="col-6">
             <h2>Output</h2>
@@ -148,6 +198,7 @@ export function Dashboard() {
                 height: "auto",
                 "max-height": "300px",
                 overflow: "auto",
+                backgroundColor: "#f0f0f0",
               }}
               id="outputLog"
             ></pre>
