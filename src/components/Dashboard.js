@@ -72,7 +72,8 @@ async function mintNewTokens() {
   let assetsFiles = document.getElementById("mintNewTokensAssetsInput").files;
   console.log(assetsFiles);
   for (const tokenProperty of tokenProperties) {
-    console.log(tokenProperty);
+    const tokenName = tokenProperty["name"];
+    log(`Processing token: ${tokenName}`);
     const fileName = tokenProperty["image"]
       ? tokenProperty["image"]
       : tokenProperty["animation_url"];
@@ -90,14 +91,15 @@ async function mintNewTokens() {
     console.log(attributes);
     const nft = {
       image,
-      name: tokenProperty["name"],
+      name: tokenName,
       description: "GTSA Gold Token",
       properties: attributes,
     };
     const metadata = await client.store(nft);
-    console.log("NFT data stored!");
-    console.log("Metadata URI: ", metadata.url);
+    log(`NFT data stored!, Metadata URI: ${metadata.url}`);
   }
+
+  log("✅ Done minting tokens 💪");
 }
 
 export function Dashboard() {
@@ -141,7 +143,14 @@ export function Dashboard() {
           </div>
           <div className="col-6">
             <h2>Output</h2>
-            <pre id="outputLog"></pre>
+            <pre
+              style={{
+                height: "auto",
+                "max-height": "300px",
+                overflow: "auto",
+              }}
+              id="outputLog"
+            ></pre>
           </div>
         </div>
         <div className="row mt-5">
