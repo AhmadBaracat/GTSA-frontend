@@ -117,7 +117,7 @@ async function mintNewTokens() {
     };
     const metadataURI = await client.store(nft);
     ids.push(tokenId);
-    metadataURIs.push(metadataURI.url.replace(/^ipfs:\/\//, ""));
+    metadataURIs.push(metadataURI.url);
     log(`NFT data stored!, Metadata URI: ${metadataURI.url}`);
   }
 
@@ -163,7 +163,7 @@ async function testTransaction() {
     const owner = selectedAddress;
     const ids = [13];
     const metadataURIs = [
-      "bafyreigryltvp6tzhhwqvrboepf2lrmua2lfowpceoqprzx53wvtslayoe/metadata.json",
+      "ipfs://bafyreighotohztyiupnonveam4ajthdg75j6oqylikzkiamfe3qvb7dwxy/metadata.json",
     ];
     // const tx = await contract.mintTokens(owner, ids, metadataURIs);
     const tx = await contract.changeMetadata(ids[0], metadataURIs[0]);
@@ -219,9 +219,9 @@ export function Dashboard() {
             <div className="mt-3">
               <button onClick={() => mintNewTokens()}>Mint new tokens</button>
             </div>
-            <div className="mt-3">
+            {/* <div className="mt-3">
               <button onClick={() => testTransaction()}>testTransaction</button>
-            </div>
+            </div> */}
           </div>
           <div className="col-6">
             <h2>Output</h2>
