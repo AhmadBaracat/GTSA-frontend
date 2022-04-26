@@ -82,12 +82,29 @@ function getContract() {
   return contract;
 }
 
+function areIdsUnique(tokenProperties) {
+  var ids = new Set();
+  for (const tokenProperty of tokenProperties) {
+    const tokenId = parseInt(tokenProperty["id"]);
+    if (ids.has(tokenId)) {
+      return false;
+    }
+
+    ids.add(tokenId);
+  }
+  return true;
+}
+
 async function mintNewTokens() {
   log("Minting new tokens...");
   const client = new NFTStorage({ token: constants.NFT_STORAGE_KEY });
   let tokenProperties = await getTokenPropertiesObjects();
   let assetsFiles = document.getElementById("mintNewTokensAssetsInput").files;
   console.log(assetsFiles);
+  if (!areIdsUnique(tokenProperties)) {
+    log("🚨 🚨 Ids are not unique please check the uploaded .csv file 🚨 🚨 ");
+    return;
+  }
   var ids = [];
   var metadataURIs = [];
   for (const tokenProperty of tokenProperties) {
@@ -192,7 +209,7 @@ export function Dashboard() {
               Upload a .csv file to specify the number of NFTs to be minted as
               well as the metadata properties. Column names dictate the name of
               the properties. Each row will be a single NFT and its associated
-              properties values.
+              properties values. Token ids should be unique.
             </p>
             <div className="mt-3">
               <h4>Choose the .csv file</h4>
@@ -250,7 +267,8 @@ export function Dashboard() {
             </div>
             <div class="alert alert-warning" role="alert">
               This .csv should have exactly N rows where N is the number of
-              tokens already minted.
+              tokens already minted with all unique ids. This is to guarantee
+              that we change the metadata for all assets already minted.
             </div>
             <button>Upload .csv file</button>
           </div>
