@@ -367,6 +367,7 @@ export class Dapp extends React.Component {
 
   // This method checks if Metamask selected network is Localhost:8545
   _checkNetwork() {
+    return true;
     if (window.ethereum.networkVersion === RINKEBY_NETWORK_ID) {
       return true;
     }
