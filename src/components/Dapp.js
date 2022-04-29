@@ -95,7 +95,8 @@ export class Dapp extends React.Component {
     return (
       <div>
         <p>
-          Welcome <b>{this.state.selectedAddress}</b> 👋
+          Welcome <b>{this.state.selectedAddress}</b> 👋. You are connected to
+          contract: <b>{AddressArtifact.address}</b>
         </p>
         <Dashboard />
       </div>
