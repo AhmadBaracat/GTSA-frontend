@@ -14,11 +14,12 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1",
+    "serve": "^13.0.2",
     "web3.storage": "^4.2.0"
   },
   "scripts": {
     "prestart": "react-scripts build",
-    "start": "npm install -g serve && PORT=8080 serve -s build",
+    "start": "PORT=8080 serve -s build",
     "start-dev": "PORT=8080 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
