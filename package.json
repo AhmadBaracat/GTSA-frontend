@@ -17,7 +17,7 @@
     "web3.storage": "^4.2.0"
   },
   "scripts": {
-    "prestart": "npm run build",
+    "prestart": "react-scripts build",
     "start": "PORT=8080 serve -s build",
     "start-dev": "PORT=8080 react-scripts start",
     "build": "react-scripts build",
