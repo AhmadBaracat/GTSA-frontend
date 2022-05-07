@@ -9,6 +9,7 @@ const ERROR_CODE_TX_REJECTED_BY_USER = 4001;
 var currentOutputId;
 var currentCSVFileId;
 var currentAssetsDirId;
+var currentAttributeNameId;
 
 function alertAndExit(msg) {
   alert(msg);
@@ -26,10 +27,12 @@ function changeState(changeMetadata) {
     currentOutputId = "outputLogMetadata";
     currentCSVFileId = "CSVFileInputMetadata";
     currentAssetsDirId = "AssetsDirMetadata";
+    currentAttributeNameId = "attributeNameInputMetadata";
   } else {
     currentOutputId = "outputLog";
     currentCSVFileId = "CSVFileInput";
     currentAssetsDirId = "AssetsDir";
+    currentAttributeNameId = "attributeNameInput";
   }
 }
 
@@ -64,7 +67,6 @@ async function processMintNewTokensFile(changeMetadata) {
       "The chosen .csv file contains neither an image or animation_url colums"
     );
   }
-
   let attributes = [];
   const attrPrefix = "attr_";
   header
@@ -72,7 +74,17 @@ async function processMintNewTokensFile(changeMetadata) {
     .forEach((column) => attributes.push(column.replace(attrPrefix, "")));
   log(`Found ${attributes.length} attributes: ${attributes}`);
   log(`Found definition for ${tokenProperties.length - 1} tokens`);
-  // log("Press the Minting button to mint the new tokens 🚀 💪");
+
+  log(
+    "Checking for the existance of multiplier attribute name in .csv file..."
+  );
+  let attributeNameInput = document.getElementById(currentAttributeNameId);
+  let attributeName = attributeNameInput.value;
+  if (!attributes.includes(attributeName)) {
+    alertAndExit(
+      "The chosen .csv file doesn't contain the specified attribute name"
+    );
+  }
 }
 
 function extractAttributes(tokenProperty) {
@@ -122,7 +134,10 @@ async function mintNewTokens(changeMetadata) {
     log("🚨 🚨 Ids are not unique please check the uploaded .csv file 🚨 🚨 ");
     return;
   }
+  let attributeNameInput = document.getElementById(currentAttributeNameId);
+  let attributeName = attributeNameInput.value;
   var ids = [];
+  var multipliers = [];
   var metadataURIs = [];
   for (const tokenProperty of tokenProperties) {
     const tokenId = parseInt(tokenProperty["id"]);
@@ -151,6 +166,7 @@ async function mintNewTokens(changeMetadata) {
     };
     const metadataURI = await client.store(nft);
     ids.push(tokenId);
+    multipliers.push(attributes[attributeName]);
     metadataURIs.push(metadataURI.url);
     log(`NFT data stored!, Metadata URI: ${metadataURI.url}`);
   }
@@ -168,9 +184,9 @@ async function mintNewTokens(changeMetadata) {
     const owner = selectedAddress;
     var tx;
     if (changeMetadata) {
-      tx = await contract.changeMetadata(ids, metadataURIs);
+      tx = await contract.changeMetadata(ids, multipliers, metadataURIs);
     } else {
-      tx = await contract.mintTokens(owner, ids, metadataURIs);
+      tx = await contract.mintTokens(owner, ids, multipliers, metadataURIs);
     }
 
     const receipt = await tx.wait();
@@ -248,6 +264,18 @@ export function Dashboard() {
               />
             </div>
             <div className="mt-3">
+              <label for="attributeNameInput">
+                Name of attribute to be used as multiplier (ex: weight_in_g):
+              </label>
+              <br />
+              <input
+                type="text"
+                id="attributeNameInput"
+                name="Token attribute name"
+                placeholder="weight_in_g"
+              />
+            </div>
+            <div className="mt-3">
               <button onClick={() => processMintNewTokensFile(false)}>
                 Process new tokens file
               </button>
@@ -302,6 +330,18 @@ export function Dashboard() {
                 webkitdirectory=""
                 type="file"
                 id="AssetsDirMetadata"
+              />
+            </div>
+            <div className="mt-3">
+              <label for="attributeNameInputMetadata">
+                Name of attribute to be used as multiplier (ex: weight_in_g):
+              </label>
+              <br />
+              <input
+                type="text"
+                id="attributeNameInputMetadata"
+                name="Token attribute name"
+                placeholder="weight_in_g"
               />
             </div>
             <div className="mt-3">
