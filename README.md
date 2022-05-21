@@ -1,4 +1,4 @@
-# Sample React Dapp
+# Sample React Dapp 
 
 This directory has a sample Dapp to interact with your contracts, built using
 React.
